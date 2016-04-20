@@ -1,16 +1,25 @@
-#include <linux/module.h>
-#include <linux/kernel.h>
-
 #include <linux/init.h>
+#include <linux/module.h>
 #include <linux/device.h>
+#include <linux/kernel.h>
 #include <linux/fs.h>
 
 #define DEVICE_NAME "tinymod"
+#define CLASS_NAME "tinymd"
+
+MODULE_LICENSE("GPL");
+MODULE_AUTHOR("Alan Ness");
+MODULE_DESCRIPTION("A simple linux char driver");
+MODULE_VERSION("0.1");
+
+// to test, use echo and cat on the device 'file' in /dev
 
 static int majorNumber;
 static char message[256] = {0};
 static short size_of_message;
 static int numberOpens = 0;
+static struct class* tinymodClass = NULL;
+static struct device* tinymodDevice = NULL;
 
 static int dev_open(struct inode *, struct file *);
 static int dev_release(struct inode *, struct file *);
@@ -35,6 +44,23 @@ static int __init tinymod_init(void){
 	}
 	printk(KERN_INFO "Registered correctly with major number %d\n", majorNumber);
 
+	tinymodClass = class_create(THIS_MODULE, CLASS_NAME);
+	if(IS_ERR(tinymodClass)){
+		unregister_chrdev(majorNumber, DEVICE_NAME);
+		printk(KERN_ALERT "Failed to register device class\n");
+		return PTR_ERR(tinymodClass);
+	}
+	printk(KERN_INFO "tinymod: device class registered correctly\n");
+
+	tinymodDevice = device_create(tinymodClass, NULL, MKDEV(majorNumber, 0), NULL, DEVICE_NAME);
+	if(IS_ERR(tinymodDevice)){
+		class_destroy(tinymodClass);
+		unregister_chrdev(majorNumber, DEVICE_NAME);
+		printk(KERN_ALERT "Failed to create the device\n");
+		return PTR_ERR(tinymodDevice);
+	}
+
+	printk(KERN_INFO "tinymod: device class created correctly\n");
 	return 0;
 }
 
