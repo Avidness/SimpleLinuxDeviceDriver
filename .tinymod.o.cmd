@@ -658,6 +658,12 @@ deps_/home/username/SimpleLinuxDeviceDriver/tinymod.o := \
   include/uapi/linux/fcntl.h \
   arch/x86/include/uapi/asm/fcntl.h \
   include/uapi/asm-generic/fcntl.h \
+  arch/x86/include/asm/uaccess.h \
+    $(wildcard include/config/x86/intel/usercopy.h) \
+    $(wildcard include/config/debug/strict/user/copy/checks.h) \
+  arch/x86/include/asm/smap.h \
+    $(wildcard include/config/x86/smap.h) \
+  arch/x86/include/asm/uaccess_32.h \
 
 /home/username/SimpleLinuxDeviceDriver/tinymod.o: $(deps_/home/username/SimpleLinuxDeviceDriver/tinymod.o)
 

@@ -3,6 +3,7 @@
 #include <linux/device.h>
 #include <linux/kernel.h>
 #include <linux/fs.h>
+#include <asm/uaccess.h>
 
 #define DEVICE_NAME "tinymod"
 #define CLASS_NAME "tinymd"
@@ -65,7 +66,11 @@ static int __init tinymod_init(void){
 }
 
 static void __exit tinymod_exit(void){
-	printk(KERN_INFO "Removing module.\n");				
+	device_destroy(tinymodClass, MKDEV(majorNumber, 0));
+	class_unregister(tinymodClass);
+	class_destroy(tinymodClass);
+	unregister_chrdev(majorNumber, DEVICE_NAME);
+	printk(KERN_INFO "Removing the tinymod module.\n");
 }
 
 static int dev_open(struct inode *inodep, struct file *filep){
@@ -75,11 +80,17 @@ static int dev_open(struct inode *inodep, struct file *filep){
 }
 
 static ssize_t dev_read(struct file *filep, char *buffer, size_t len, loff_t *offset){
-	//int error_count = 0;
+	int error_count = 0;
+	error_count = copy_to_user(buffer, message, size_of_message);
 
-	printk(KERN_INFO "Read instructions unfinished");
-	return (size_of_message=0);
-
+	if(error_count==0){
+		printk(KERN_INFO "tinymod: sent %d characters to the user\n", size_of_message);
+		return (size_of_message=0);
+	}
+	else{
+		printk(KERN_INFO "tinymod: Failed to send %d characters to the user\n", error_count);
+		return -EFAULT;
+	}
 }
 
 static ssize_t dev_write(struct file *filep, const char *buffer, size_t len, loff_t *offset){
