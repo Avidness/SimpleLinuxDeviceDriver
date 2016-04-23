@@ -1,8 +1,8 @@
-cmd_/home/username/SimpleLinuxDeviceDriver/tinymod.o := gcc -Wp,-MD,/home/username/SimpleLinuxDeviceDriver/.tinymod.o.d  -nostdinc -isystem /usr/lib/gcc/i686-linux-gnu/4.8/include  -I./arch/x86/include -Iarch/x86/include/generated/uapi -Iarch/x86/include/generated  -Iinclude -I./arch/x86/include/uapi -Iarch/x86/include/generated/uapi -I./include/uapi -Iinclude/generated/uapi -include ./include/linux/kconfig.h -Iubuntu/include  -D__KERNEL__ -Wall -Wundef -Wstrict-prototypes -Wno-trigraphs -fno-strict-aliasing -fno-common -Werror-implicit-function-declaration -Wno-format-security -std=gnu89 -m32 -msoft-float -mregparm=3 -freg-struct-return -fno-pic -mpreferred-stack-boundary=2 -march=i686 -mtune=generic -maccumulate-outgoing-args -Wa,-mtune=generic32 -ffreestanding -DCONFIG_AS_SSSE3=1 -DCONFIG_AS_CRC32=1 -DCONFIG_AS_AVX=1 -DCONFIG_AS_AVX2=1 -pipe -Wno-sign-compare -fno-asynchronous-unwind-tables -mno-sse -mno-mmx -mno-sse2 -mno-3dnow -mno-avx -fno-delete-null-pointer-checks -O2 --param=allow-store-data-races=0 -Wframe-larger-than=1024 -fstack-protector -Wno-unused-but-set-variable -fno-omit-frame-pointer -fno-optimize-sibling-calls -fno-var-tracking-assignments -pg -Wdeclaration-after-statement -Wno-pointer-sign -fno-strict-overflow -fconserve-stack -Werror=implicit-int -Werror=strict-prototypes -DCC_HAVE_ASM_GOTO  -DMODULE  -D"KBUILD_STR(s)=\#s" -D"KBUILD_BASENAME=KBUILD_STR(tinymod)"  -D"KBUILD_MODNAME=KBUILD_STR(tinymod)" -c -o /home/username/SimpleLinuxDeviceDriver/.tmp_tinymod.o /home/username/SimpleLinuxDeviceDriver/tinymod.c
+cmd_/home/anothername/SimpleLinuxDeviceDriver/tinymod.o := gcc -Wp,-MD,/home/anothername/SimpleLinuxDeviceDriver/.tinymod.o.d  -nostdinc -isystem /usr/lib/gcc/i686-linux-gnu/4.8/include  -I./arch/x86/include -Iarch/x86/include/generated/uapi -Iarch/x86/include/generated  -Iinclude -I./arch/x86/include/uapi -Iarch/x86/include/generated/uapi -I./include/uapi -Iinclude/generated/uapi -include ./include/linux/kconfig.h -Iubuntu/include  -D__KERNEL__ -Wall -Wundef -Wstrict-prototypes -Wno-trigraphs -fno-strict-aliasing -fno-common -Werror-implicit-function-declaration -Wno-format-security -std=gnu89 -m32 -msoft-float -mregparm=3 -freg-struct-return -fno-pic -mpreferred-stack-boundary=2 -march=i686 -mtune=generic -maccumulate-outgoing-args -Wa,-mtune=generic32 -ffreestanding -DCONFIG_AS_SSSE3=1 -DCONFIG_AS_CRC32=1 -DCONFIG_AS_AVX=1 -DCONFIG_AS_AVX2=1 -pipe -Wno-sign-compare -fno-asynchronous-unwind-tables -mno-sse -mno-mmx -mno-sse2 -mno-3dnow -mno-avx -fno-delete-null-pointer-checks -O2 --param=allow-store-data-races=0 -Wframe-larger-than=1024 -fstack-protector -Wno-unused-but-set-variable -fno-omit-frame-pointer -fno-optimize-sibling-calls -fno-var-tracking-assignments -pg -Wdeclaration-after-statement -Wno-pointer-sign -fno-strict-overflow -fconserve-stack -Werror=implicit-int -Werror=strict-prototypes -DCC_HAVE_ASM_GOTO  -DMODULE  -D"KBUILD_STR(s)=\#s" -D"KBUILD_BASENAME=KBUILD_STR(tinymod)"  -D"KBUILD_MODNAME=KBUILD_STR(tinymod)" -c -o /home/anothername/SimpleLinuxDeviceDriver/.tmp_tinymod.o /home/anothername/SimpleLinuxDeviceDriver/tinymod.c
 
-source_/home/username/SimpleLinuxDeviceDriver/tinymod.o := /home/username/SimpleLinuxDeviceDriver/tinymod.c
+source_/home/anothername/SimpleLinuxDeviceDriver/tinymod.o := /home/anothername/SimpleLinuxDeviceDriver/tinymod.c
 
-deps_/home/username/SimpleLinuxDeviceDriver/tinymod.o := \
+deps_/home/anothername/SimpleLinuxDeviceDriver/tinymod.o := \
   include/linux/init.h \
     $(wildcard include/config/broken/rodata.h) \
     $(wildcard include/config/lto.h) \
@@ -665,6 +665,6 @@ deps_/home/username/SimpleLinuxDeviceDriver/tinymod.o := \
     $(wildcard include/config/x86/smap.h) \
   arch/x86/include/asm/uaccess_32.h \
 
-/home/username/SimpleLinuxDeviceDriver/tinymod.o: $(deps_/home/username/SimpleLinuxDeviceDriver/tinymod.o)
+/home/anothername/SimpleLinuxDeviceDriver/tinymod.o: $(deps_/home/anothername/SimpleLinuxDeviceDriver/tinymod.o)
 
-$(deps_/home/username/SimpleLinuxDeviceDriver/tinymod.o):
+$(deps_/home/anothername/SimpleLinuxDeviceDriver/tinymod.o):

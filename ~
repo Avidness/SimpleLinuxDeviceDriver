@@ -6,7 +6,7 @@
 #include <asm/uaccess.h>
 
 #define DEVICE_NAME "tinymod"
-#define CLASS_NAME "tinymd"
+#define CLASS_NAME "tinymd11111111"
 
 MODULE_LICENSE("GPL");
 MODULE_AUTHOR("Alan Ness");
@@ -16,7 +16,7 @@ MODULE_VERSION("0.1");
 // to test, use echo and cat on the device 'file' in /dev
 
 static int majorNumber;
-static char message[1000] = {0};
+static char message[1024] = {0};
 static short size_of_message;
 static int numberOpens = 0;
 static struct class* tinymodClass = NULL;
@@ -102,19 +102,13 @@ static ssize_t dev_read(struct file *filep, char *buffer, size_t len, loff_t *of
 
 static ssize_t dev_write(struct file *filep, const char *buffer, size_t len, loff_t *offset){
 
-	int i = 0;
-	int buf_count = 0;
-	
-	//printk(KERN_INFO "buffer: %s\n", buffer);
-	//printk(KERN_INFO "message: %s\n", message);
-	//printk(KERN_INFO "len: %d\n", len);
-	//printk(KERN_INFO "sizeofmes: %d\n", size_of_message);
+	char result[1024];
+	strcpy(result, message);
+	strcat(result, buffer);
+	printk(KERN_INFO "tinymod: result: %s\n", result);
 
-	// Add the buffer to the message
-	for (i=size_of_message; i<(size_of_message+len-1); i++){
-		message[i] = buffer[buf_count];
-		buf_count++;
-	}
+	//sprintf(message, "%s(%d letters)", message, len);
+	strcpy(message, result);
 
 	size_of_message = strlen(message);
 	printk(KERN_INFO "Received %d characters from the user: message: %s buffer: %s\n", len, message, buffer);

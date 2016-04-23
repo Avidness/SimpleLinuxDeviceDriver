@@ -1,2 +1,2 @@
-/home/username/SimpleLinuxDeviceDriver/tinymod.ko
-/home/username/SimpleLinuxDeviceDriver/tinymod.o
+/home/anothername/SimpleLinuxDeviceDriver/tinymod.ko
+/home/anothername/SimpleLinuxDeviceDriver/tinymod.o
