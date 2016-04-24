@@ -7,21 +7,23 @@
 
 #define DEVICE_NAME "tinymod"
 #define CLASS_NAME "tinymd"
+#define BUFFER_MAX 100
 
 MODULE_LICENSE("GPL");
-MODULE_AUTHOR("Alan Ness");
+MODULE_AUTHOR("Alan Ness, Connor Roggero");
 MODULE_DESCRIPTION("A simple linux char driver");
 MODULE_VERSION("0.1");
 
 // to test, use echo and cat on the device 'file' in /dev
 
 static int majorNumber;
-static char message[1000] = {0};
-static short size_of_message;
+static char message[BUFFER_MAX];
+static short size_of_message = 0;
 static int numberOpens = 0;
 static struct class* tinymodClass = NULL;
 static struct device* tinymodDevice = NULL;
 
+// Functions required by character driver
 static int dev_open(struct inode *, struct file *);
 static int dev_release(struct inode *, struct file *);
 static ssize_t dev_read(struct file *, char *, size_t, loff_t *);
@@ -38,6 +40,7 @@ static struct file_operations fops =
 static int __init tinymod_init(void){
 	printk(KERN_INFO "Installing module.\n");
 
+	//Create Major Number and Check for Errors
 	majorNumber = register_chrdev(0, DEVICE_NAME, &fops);
 	if(majorNumber<0){
 		printk(KERN_ALERT "Failed to register major number");
@@ -80,45 +83,64 @@ static int dev_open(struct inode *inodep, struct file *filep){
 }
 
 static ssize_t dev_read(struct file *filep, char *buffer, size_t len, loff_t *offset){
+
 	int error_count = 0;
 	int i = 0;
-	error_count = copy_to_user(buffer, message, size_of_message);
 
-	if(error_count==0){
-		printk(KERN_INFO "tinymod: sent %d characters to the user. message: %s\n", size_of_message, message);
-		
-		for (i=0; i< size_of_message; i++){
-			message[i] = '\0';
+	if(size_of_message > len) {
+
+		// copy_to_user has the format ( * to, *from, size) and returns 0 on success
+		error_count = copy_to_user(buffer, message, size_of_message);
+
+		if (error_count == 0) {            // if true then have success
+		  printk(KERN_INFO "tinymod: Sent %d characters to the user\n", size_of_message);
+		  for(i = 0; i < BUFFER_MAX; i++) {
+		  	message[i] = message[i + len];
+		  }
+		  return (size_of_message=0);  // clear the position to the start and return 0
 		}
-		printk(KERN_INFO "tinymod: reset message to be %s\n", message);
-		return (size_of_message=0);
+		else {
+		  printk(KERN_INFO "tinymod: Failed to send %d characters to the user\n", error_count);
+		  return -EFAULT;              // Failed -- return a bad address message (i.e. -14)
+		}
 	}
-	else{
-		printk(KERN_INFO "tinymod: Failed to send %d characters to the user\n", error_count);
-		return -EFAULT;
-	}
+	else {
+		 error_count = copy_to_user(buffer, message, len);
 
+		 if (error_count == 0) {
+		 	printk(KERN_INFO "tinymod: Sent %d characters to the user\n", size_of_message);
+
+		 	return (size_of_message = 0);
+		 }
+		 else {
+		 	printk(KERN_INFO "tinymod: Failed to send %d characters to the user\n", error_count);
+		 	return -EFAULT;
+		 }
+	}
 }
 
 static ssize_t dev_write(struct file *filep, const char *buffer, size_t len, loff_t *offset){
-
 	int i = 0;
-	int buf_count = 0;
-	
-	//printk(KERN_INFO "buffer: %s\n", buffer);
-	//printk(KERN_INFO "message: %s\n", message);
-	//printk(KERN_INFO "len: %d\n", len);
-	//printk(KERN_INFO "sizeofmes: %d\n", size_of_message);
-
-	// Add the buffer to the message
-	for (i=size_of_message; i<(size_of_message+len-1); i++){
-		message[i] = buffer[buf_count];
-		buf_count++;
+	if((size_of_message + len) > BUFFER_MAX) {
+		for(i = 0; i < (BUFFER_MAX - size_of_message); i++) {
+			message[i + size_of_message] = buffer[i];
+		}
+		printk(KERN_INFO "Reached Buffer Limit. Stored %d Bytes.\n", i);
+		size_of_message = strlen(message);
 	}
-
-	size_of_message = strlen(message);
-	printk(KERN_INFO "Received %d characters from the user: message: %s buffer: %s\n", len, message, buffer);
-	return len;
+	else if(strlen(message) < 1) {
+		sprintf(message, "%s", buffer);
+		size_of_message = strlen(message);
+		printk(KERN_INFO "Received %d characters from user, %d bytes left\n", len, (BUFFER_MAX - size_of_message));
+		i = len;
+	}
+	else {
+		sprintf(message, "%s%s", message, buffer);
+		size_of_message = strlen(message);
+		printk(KERN_INFO "Received %d characters from user, %d bytes left\n", len, (BUFFER_MAX - size_of_message));
+		i = len;
+	}
+	return i;
 }
 
 static int dev_release(struct inode *inodep, struct file *filep){
