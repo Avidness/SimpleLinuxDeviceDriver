@@ -1,1 +1,0 @@
-cmd_/home/anothername/SimpleLinuxDeviceDriver/tinymod.ko := ld -r -m elf_i386 -T ./scripts/module-common.lds --build-id  -o /home/anothername/SimpleLinuxDeviceDriver/tinymod.ko /home/anothername/SimpleLinuxDeviceDriver/tinymod.o /home/anothername/SimpleLinuxDeviceDriver/tinymod.mod.o
