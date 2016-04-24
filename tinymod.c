@@ -7,10 +7,10 @@
 
 #define DEVICE_NAME "tinymod"
 #define CLASS_NAME "tinymd"
-#define BUFFER_MAX 100
+#define BUFFER_MAX 1000
 
 MODULE_LICENSE("GPL");
-MODULE_AUTHOR("Alan Ness, Connor Roggero");
+MODULE_AUTHOR("Alan Ness, Connor Roggero, Evan Glazer");
 MODULE_DESCRIPTION("A simple linux char driver");
 MODULE_VERSION("0.1");
 
@@ -94,10 +94,17 @@ static ssize_t dev_read(struct file *filep, char *buffer, size_t len, loff_t *of
 
 		if (error_count == 0) {            // if true then have success
 		  printk(KERN_INFO "tinymod: Sent %d characters to the user\n", size_of_message);
-		  for(i = 0; i < BUFFER_MAX; i++) {
+		
+		// Wipe length of the readout
+		for(i = 0; i < len; i++) {
+			message[i] = '\0';	
+		}  
+		// Append rest of the message to the start
+		for(i = 0; i < BUFFER_MAX; i++) {
 		  	message[i] = message[i + len];
-		  }
-		  return (size_of_message=0);  // clear the position to the start and return 0
+		}
+
+		return (size_of_message = 0);  // clear the position to the start and return 0
 		}
 		else {
 		  printk(KERN_INFO "tinymod: Failed to send %d characters to the user\n", error_count);
@@ -109,6 +116,11 @@ static ssize_t dev_read(struct file *filep, char *buffer, size_t len, loff_t *of
 
 		 if (error_count == 0) {
 		 	printk(KERN_INFO "tinymod: Sent %d characters to the user\n", size_of_message);
+			
+			// Wipe Buffer
+			for(i = 0; i < BUFFER_MAX; i++) {
+				message[i] = '\0';
+			}
 
 		 	return (size_of_message = 0);
 		 }

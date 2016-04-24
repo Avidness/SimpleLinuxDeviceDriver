@@ -20,7 +20,12 @@ int main(){
    scanf("%[^\n]%*c", stringToSend);                // Read in a string (with spaces)
    printf("Writing message to the device '%s'.\n", stringToSend);
    ret = write(fd, stringToSend, strlen(stringToSend)); // Send the string
-   if (ret < 0){
+   printf("Type in a short string to send to the kernel module:\n");
+   scanf("%[^\n]%*c", stringToSend);
+   printf("Writing message to the device '%s'.\n", stringToSend);
+   ret = write(fd, stringToSend, strlen(stringToSend)); // Send the string
+ 
+  if (ret < 0){
       perror("Failed to write the message to the device.");
       return errno;
    }
