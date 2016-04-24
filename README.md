@@ -1,13 +1,17 @@
-# SimpleLinuxDeviceDriver
+#SimpleLinuxDeviceDriver
 
 #############
 # 1. Set up #
 #############
 
 a) Extract the contents of the zip file into an empty dedicated directory.
+
 b) Run 'uname -a' and make a note the kernel version you are running. (E.g., 4.2.0-27-generic)
+
 c) Open the Makefile. 
+
 d) Edit the kernel version if necessary. 
+
 e) Edit the file path to point to the directory you chose.
 
 ################
@@ -15,7 +19,9 @@ e) Edit the file path to point to the directory you chose.
 ################
 
 a) On the console, run 'make'.
+
 b) Run 'sudo insmod tinymod.ko'
+
 c) 'dmesg' to confirm the device was correctly initiated.
 
 ###########
