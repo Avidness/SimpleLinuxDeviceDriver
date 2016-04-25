@@ -81,64 +81,44 @@ static int dev_open(struct inode *inodep, struct file *filep){
 }
 
 static ssize_t dev_read(struct file *filep, char *buffer, size_t len, loff_t *offset){
-
-	int error_count = 0;
-	int i = 0;
+	int error_id = 0, i = 0;
 	long requestedlength = len;
+	long length_to_send = requestedlength;
+
+	// Only return what is actually in the message if the user requests more
+	if(size_of_message <= requestedlength){
+		length_to_send = size_of_message;
+	}
 
 	printk(KERN_INFO "tinymod: Current message: '%s', messagelength: %lu", message, size_of_message);
 
-	if(size_of_message > len) {
+	error_id = copy_to_user(buffer, message, length_to_send);
+	if (error_id == 0) {
+		printk(KERN_INFO "tinymod: Sent %lu characters to the user\n", requestedlength);
 
-		// copy_to_user has the format ( * to, *from, size) and returns 0 on success
-		error_count = copy_to_user(buffer, message, requestedlength);
-
-		if (error_count == 0) {            // if true then have success
-		  printk(KERN_INFO "tinymod: Sent %lu characters to the user\n", requestedlength);
-		
 		// Wipe length of the readout
 		printk(KERN_INFO "Message: ");
-		for(i = 0; i < len; i++) {
+		for(i = 0; i < length_to_send; i++) {
 			printk("%c", message[i]);
 			message[i] = '\0';	
-		}  
-		// Append rest of the message to the start
-		for(i = 0; i < BUFFER_MAX; i++) {
-		  	message[i] = message[i + len];
+		} 
+
+		// If we haven't wiped the whole message
+		if(size_of_message > requestedlength){
+
+			// Shift the remaining characters towards the head of the queue
+			for(i = 0; i < BUFFER_MAX; i++) {
+		  		message[i] = message[i + len];
+			}
 		}
 
 		size_of_message = strlen(message);
 		printk(KERN_INFO "New message: '%s', Size: %lu\n", message, size_of_message);
-
-		return 0; //(size_of_message = 0);  // clear the position to the start and return 0
-		}
-		else {
-		  printk(KERN_INFO "tinymod: Failed to send %d to the user\n", error_count);
-		  return -EFAULT;              // Failed -- return a bad address message (i.e. -14)
-		}
+		return 0; // Success
 	}
 	else {
-		 error_count = copy_to_user(buffer, message, size_of_message);
-
-		 if (error_count == 0) {
-		 	printk(KERN_INFO "tinymod: Sent %lu characters to the user\n", size_of_message);
-			
-			// Wipe Buffer
-			printk(KERN_INFO "Message: ");
-			for(i = 0; i < BUFFER_MAX; i++) {
-				printk("%c", message[i]);
-				message[i] = '\0';
-			}
-			size_of_message = strlen(message);
-
-			printk(KERN_INFO "New Message: '%s', Size: %lu\n", message, size_of_message);
-
-		 	return 0;// (size_of_message = 0);
-		 }
-		 else {
-		 	printk(KERN_INFO "tinymod: Failed to send %d characters to the user\n", error_count);
-		 	return -EFAULT;
-		 }
+		printk(KERN_INFO "tinymod: Failed to send %d to the user\n", error_id);
+		return -EFAULT; // Failed -- return a bad address message (i.e. -14)
 	}
 }
 
