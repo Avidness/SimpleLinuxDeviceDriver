@@ -7,14 +7,12 @@
 
 #define DEVICE_NAME "tinymod"
 #define CLASS_NAME "tinymd"
-#define BUFFER_MAX 1000
+#define BUFFER_MAX 10
 
 MODULE_LICENSE("GPL");
 MODULE_AUTHOR("Alan Ness, Connor Roggero, Evan Glazer");
 MODULE_DESCRIPTION("A simple linux char driver");
 MODULE_VERSION("0.1");
-
-// to test, use echo and cat on the device 'file' in /dev
 
 static int majorNumber;
 static char message[BUFFER_MAX];
@@ -78,7 +76,7 @@ static void __exit tinymod_exit(void){
 
 static int dev_open(struct inode *inodep, struct file *filep){
 	numberOpens++;
-	printk(KERN_INFO "Tinymod device has been opened %d time(s)\n", numberOpens);
+	printk(KERN_INFO "tinymod: device has been opened %d time(s)\n", numberOpens);
 	return 0;
 }
 
@@ -86,6 +84,8 @@ static ssize_t dev_read(struct file *filep, char *buffer, size_t len, loff_t *of
 
 	int error_count = 0;
 	int i = 0;
+
+	printk(KERN_INFO "tinymod: current message:%s, messagelength:%d", message, size_of_message);
 
 	if(size_of_message > len) {
 
@@ -132,27 +132,26 @@ static ssize_t dev_read(struct file *filep, char *buffer, size_t len, loff_t *of
 }
 
 static ssize_t dev_write(struct file *filep, const char *buffer, size_t len, loff_t *offset){
-	int i = 0;
-	if((size_of_message + len) > BUFFER_MAX) {
-		for(i = 0; i < (BUFFER_MAX - size_of_message); i++) {
-			message[i + size_of_message] = buffer[i];
+	int i = 0, j = 0;
+
+	printk(KERN_INFO "Existing message: '%s' \nPending addition:'%s'\n", message, buffer);
+
+	// Loop through all possible 1000 bytes
+	for(i=0; i<BUFFER_MAX; i++) {
+		
+		// Copy a new character from 'buffer' into 'message' if:
+		// 	1. We have finished looping over the existing characters in 'message' AND
+		//	2. We haven't iterated past the end of the buffer AND
+		//	3. We haven't reached the end of the 1000 bytes
+		if(i >= size_of_message && i < (size_of_message+len) && i < BUFFER_MAX){
+			message[i] = buffer[j];
+			printk(KERN_INFO "adding %c, at index %d\n", buffer[j], i);
+			j++;
 		}
-		printk(KERN_INFO "Reached Buffer Limit. Stored %d Bytes.\n", i);
-		size_of_message = strlen(message);
 	}
-	else if(strlen(message) < 1) {
-		sprintf(message, "%s", buffer);
-		size_of_message = strlen(message);
-		printk(KERN_INFO "Received %d characters from user, %d bytes left\n", len, (BUFFER_MAX - size_of_message));
-		i = len;
-	}
-	else {
-		sprintf(message, "%s%s", message, buffer);
-		size_of_message = strlen(message);
-		printk(KERN_INFO "Received %d characters from user, %d bytes left\n", len, (BUFFER_MAX - size_of_message));
-		i = len;
-	}
-	return i;
+	size_of_message = strlen(message);
+	printk(KERN_INFO "New message:'%s' \nMessage size:%d\n", message, size_of_message);
+	return size_of_message;
 }
 
 static int dev_release(struct inode *inodep, struct file *filep){
