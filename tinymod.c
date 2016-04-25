@@ -86,7 +86,7 @@ static ssize_t dev_read(struct file *filep, char *buffer, size_t len, loff_t *of
 	int i = 0;
 	long requestedlength = len;
 
-	printk(KERN_INFO "tinymod: current message:%s, messagelength:%lu", message, size_of_message);
+	printk(KERN_INFO "tinymod: Current message: '%s', messagelength: %lu", message, size_of_message);
 
 	if(size_of_message > len) {
 
@@ -97,7 +97,9 @@ static ssize_t dev_read(struct file *filep, char *buffer, size_t len, loff_t *of
 		  printk(KERN_INFO "tinymod: Sent %lu characters to the user\n", requestedlength);
 		
 		// Wipe length of the readout
+		printk(KERN_INFO "Message: ");
 		for(i = 0; i < len; i++) {
+			printk("%c", message[i]);
 			message[i] = '\0';	
 		}  
 		// Append rest of the message to the start
@@ -106,7 +108,7 @@ static ssize_t dev_read(struct file *filep, char *buffer, size_t len, loff_t *of
 		}
 
 		size_of_message = strlen(message);
-		printk(KERN_INFO "New message:%s size:%lu\n", message, size_of_message);
+		printk(KERN_INFO "New message: '%s', Size: %lu\n", message, size_of_message);
 
 		return 0; //(size_of_message = 0);  // clear the position to the start and return 0
 		}
@@ -122,12 +124,14 @@ static ssize_t dev_read(struct file *filep, char *buffer, size_t len, loff_t *of
 		 	printk(KERN_INFO "tinymod: Sent %lu characters to the user\n", size_of_message);
 			
 			// Wipe Buffer
+			printk(KERN_INFO "Message: ");
 			for(i = 0; i < BUFFER_MAX; i++) {
+				printk("%c", message[i]);
 				message[i] = '\0';
 			}
 			size_of_message = strlen(message);
 
-			printk(KERN_INFO "New Message:%s size: %lu\n", message, size_of_message);
+			printk(KERN_INFO "New Message: '%s', Size: %lu\n", message, size_of_message);
 
 		 	return 0;// (size_of_message = 0);
 		 }
@@ -140,9 +144,9 @@ static ssize_t dev_read(struct file *filep, char *buffer, size_t len, loff_t *of
 
 static ssize_t dev_write(struct file *filep, const char *buffer, size_t len, loff_t *offset){
 	int i = 0, j = 0;
-	long buflength = len;
+	long buflength = len - 1;
 
-	printk(KERN_INFO "Existing message: '%s' size: %lu, buflen: %lu \nPending addition:'%s'\n", message, size_of_message, buflength, buffer);
+	printk(KERN_INFO "Existing message: '%s', Size: %lu, Buflen: %lu \nPending addition:'%s'\n", message, size_of_message, buflength, buffer);
 
 	// Loop through all possible 1000 bytes
 	for(i=0; i<BUFFER_MAX; i++) {
@@ -151,14 +155,14 @@ static ssize_t dev_write(struct file *filep, const char *buffer, size_t len, lof
 		// 	1. We have finished looping over the existing characters in 'message' AND
 		//	2. We haven't iterated past the end of the buffer AND
 		//	3. We haven't reached the end of the 1000 bytes
-		if(i >= size_of_message && i < (size_of_message+buflength-1) && i < BUFFER_MAX){
+		if(i >= size_of_message && i < (size_of_message+buflength) && i < BUFFER_MAX){
 			message[i] = buffer[j];
-			printk(KERN_INFO "adding %c, at index %d\n", buffer[j], i);
+			printk(KERN_INFO "Adding %c, at index %d\n", buffer[j], i);
 			j++;
 		}
 	}
 	size_of_message = strlen(message);
-	printk(KERN_INFO "New message:'%s' \nMessage size:%lu\n", message, size_of_message);
+	printk(KERN_INFO "New message: '%s' \nMessage size: %lu\n", message, size_of_message);
 	return size_of_message;
 }
 
