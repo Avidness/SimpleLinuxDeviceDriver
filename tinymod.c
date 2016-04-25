@@ -16,7 +16,7 @@ MODULE_VERSION("0.1");
 
 static int majorNumber;
 static char message[BUFFER_MAX];
-static short size_of_message = 0;
+static long size_of_message = 0;
 static int numberOpens = 0;
 static struct class* tinymodClass = NULL;
 static struct device* tinymodDevice = NULL;
@@ -84,16 +84,17 @@ static ssize_t dev_read(struct file *filep, char *buffer, size_t len, loff_t *of
 
 	int error_count = 0;
 	int i = 0;
+	long requestedlength = len;
 
-	printk(KERN_INFO "tinymod: current message:%s, messagelength:%d", message, size_of_message);
+	printk(KERN_INFO "tinymod: current message:%s, messagelength:%lu", message, size_of_message);
 
 	if(size_of_message > len) {
 
 		// copy_to_user has the format ( * to, *from, size) and returns 0 on success
-		error_count = copy_to_user(buffer, message, size_of_message);
+		error_count = copy_to_user(buffer, message, requestedlength);
 
 		if (error_count == 0) {            // if true then have success
-		  printk(KERN_INFO "tinymod: Sent %d characters to the user\n", size_of_message);
+		  printk(KERN_INFO "tinymod: Sent %lu characters to the user\n", requestedlength);
 		
 		// Wipe length of the readout
 		for(i = 0; i < len; i++) {
@@ -104,25 +105,31 @@ static ssize_t dev_read(struct file *filep, char *buffer, size_t len, loff_t *of
 		  	message[i] = message[i + len];
 		}
 
-		return (size_of_message = 0);  // clear the position to the start and return 0
+		size_of_message = strlen(message);
+		printk(KERN_INFO "New message:%s size:%lu\n", message, size_of_message);
+
+		return 0; //(size_of_message = 0);  // clear the position to the start and return 0
 		}
 		else {
-		  printk(KERN_INFO "tinymod: Failed to send %d characters to the user\n", error_count);
+		  printk(KERN_INFO "tinymod: Failed to send %d to the user\n", error_count);
 		  return -EFAULT;              // Failed -- return a bad address message (i.e. -14)
 		}
 	}
 	else {
-		 error_count = copy_to_user(buffer, message, len);
+		 error_count = copy_to_user(buffer, message, size_of_message);
 
 		 if (error_count == 0) {
-		 	printk(KERN_INFO "tinymod: Sent %d characters to the user\n", size_of_message);
+		 	printk(KERN_INFO "tinymod: Sent %lu characters to the user\n", size_of_message);
 			
 			// Wipe Buffer
 			for(i = 0; i < BUFFER_MAX; i++) {
 				message[i] = '\0';
 			}
+			size_of_message = strlen(message);
 
-		 	return (size_of_message = 0);
+			printk(KERN_INFO "New Message:%s size: %lu\n", message, size_of_message);
+
+		 	return 0;// (size_of_message = 0);
 		 }
 		 else {
 		 	printk(KERN_INFO "tinymod: Failed to send %d characters to the user\n", error_count);
@@ -133,8 +140,9 @@ static ssize_t dev_read(struct file *filep, char *buffer, size_t len, loff_t *of
 
 static ssize_t dev_write(struct file *filep, const char *buffer, size_t len, loff_t *offset){
 	int i = 0, j = 0;
+	long buflength = len;
 
-	printk(KERN_INFO "Existing message: '%s' \nPending addition:'%s'\n", message, buffer);
+	printk(KERN_INFO "Existing message: '%s' size: %lu, buflen: %lu \nPending addition:'%s'\n", message, size_of_message, buflength, buffer);
 
 	// Loop through all possible 1000 bytes
 	for(i=0; i<BUFFER_MAX; i++) {
@@ -143,14 +151,14 @@ static ssize_t dev_write(struct file *filep, const char *buffer, size_t len, lof
 		// 	1. We have finished looping over the existing characters in 'message' AND
 		//	2. We haven't iterated past the end of the buffer AND
 		//	3. We haven't reached the end of the 1000 bytes
-		if(i >= size_of_message && i < (size_of_message+len-1) && i < BUFFER_MAX){
+		if(i >= size_of_message && i < (size_of_message+buflength-1) && i < BUFFER_MAX){
 			message[i] = buffer[j];
 			printk(KERN_INFO "adding %c, at index %d\n", buffer[j], i);
 			j++;
 		}
 	}
 	size_of_message = strlen(message);
-	printk(KERN_INFO "New message:'%s' \nMessage size:%d\n", message, size_of_message);
+	printk(KERN_INFO "New message:'%s' \nMessage size:%lu\n", message, size_of_message);
 	return size_of_message;
 }
 
