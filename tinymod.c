@@ -7,7 +7,7 @@
 
 #define DEVICE_NAME "tinymod"
 #define CLASS_NAME "tinymd"
-#define BUFFER_MAX 10
+#define BUFFER_MAX 1000
 
 MODULE_LICENSE("GPL");
 MODULE_AUTHOR("Alan Ness, Connor Roggero, Evan Glazer");
@@ -143,7 +143,7 @@ static ssize_t dev_write(struct file *filep, const char *buffer, size_t len, lof
 		// 	1. We have finished looping over the existing characters in 'message' AND
 		//	2. We haven't iterated past the end of the buffer AND
 		//	3. We haven't reached the end of the 1000 bytes
-		if(i >= size_of_message && i < (size_of_message+len) && i < BUFFER_MAX){
+		if(i >= size_of_message && i < (size_of_message+len-1) && i < BUFFER_MAX){
 			message[i] = buffer[j];
 			printk(KERN_INFO "adding %c, at index %d\n", buffer[j], i);
 			j++;
