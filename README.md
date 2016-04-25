@@ -22,8 +22,10 @@ a) To write to the buffer:
 b) To read the full buffer: 
 	sudo cat /dev/tinymod
 
-c) To read a single character from the buffer (FIFO)
+c) To read a single character from the buffer (FIFO):
 	sudo head -c 1 /dev/tinymod
 
 d) To remove the module:
 	sudo rmmod tinymod
+
+e) After each command run 'dmesg' to see the results.
